@@ -1,0 +1,116 @@
+<script>
+  // let tabContent = document.querySelector('.tab-pane');
+  // tabContent.addEventListener('click', () => tabContent.classList.add('active', 'show'));
+</script>
+
+<ul class="site-nav list--inline {{ nav_alignment }}" id="SiteNav" >
+  {% for link in linklists[section.settings.main_linklist].links %}
+    {%- assign child_list_handle = link.title | handleize -%}
+
+    {% comment %}
+      Check if third-level nav exists on each parent link.
+    {% endcomment %}
+    {%- assign three_level_nav = false -%}
+    {% if link.links != blank %}
+      {% if link.levels == 2 %}
+        {%- assign three_level_nav = true -%}
+      {% endif %}
+    {% endif %}
+
+    {% if link.links != blank %}
+      <li class="site-nav--has-dropdown{% if three_level_nav %} site-nav--has-centered-dropdown{% endif %}{% if link.active %} site-nav--active{% endif %}" data-has-dropdowns>
+        <button class="site-nav__link site-nav__link--main site-nav__link--button{% if link.child_active %} site-nav__link--active{% endif %}" type="button" aria-expanded="false" aria-controls="SiteNavLabel-{{ child_list_handle }}">
+          <span class="site-nav__label">{{ link.title | escape }}</span>{% include 'icon-chevron-down' %}
+        </button>
+
+        <div class="site-nav__dropdown{% if three_level_nav %} site-nav__dropdown--centered{% endif %}" id="SiteNavLabel-{{ child_list_handle }}">
+          {% if three_level_nav %}
+            <div class="site-nav__childlist display-nav__childlist-item">
+<!--               site-nav__childlist-grid -->
+              <ul class="childlist-grid_custom">
+                {% if link.links != blank %}
+                    {% for childlink in link.links %}
+                      <li class="site-nav__childlist-item ">
+                        <a href="{{ childlink.url }}"
+                          class="site-nav__link site-nav__child-link site-nav__child-link--parent"
+                          {% if childlink.current %} aria-current="page"{% endif %}
+                        >
+                          <span class="site-nav__label site-nav__label-newsize">{{ childlink.title | escape }}</span>
+                        </a>
+                        {% if childlink.links != blank %}
+                          <div class="main-c">
+                            <ul class="grandchildlink-ul" id="" >
+                            {% for grandchildlink in childlink.links %}
+                              <li class="grandchildlink_item" >
+                                <a  href="{{ grandchildlink.url }}"
+                                  class="grandchildlink-mine"
+                                {% if grandchildlink.current %} aria-current="page"{% endif %}
+                              >
+                                  <span class="site-nav__label">{{ grandchildlink.title | escape }}</span>
+                               
+                                </a>
+                              </li>
+                            {% endfor %}
+                          
+                            </ul>
+                            
+                          </div> 
+                        {% endif %}
+  
+                      </li>
+                    {% endfor %}
+                  {% endif %}
+              </ul>
+                  
+            <img src="" height="500" width="500" />
+            </div>
+
+
+          {% else %}
+            <!-- If title is equal it will provide a different menu layout then the rest -->
+            {% if link.title == "College" or link.title == "NFL" or link.title == "NHL" or link.title == "MLB" %}
+<!--               special menu for sports teams -->
+              <ul class="sports-collection-grid">
+                {% for childlink in link.links %}
+                  <li class="site-nav__label-newsize-hover">
+                    <a href="{{ childlink.url }}"
+                    class="site-nav__link site-nav__child-link site-nav__link-custom-icon {% if forloop.last %} site-nav__link--last{% endif %}"
+                    {% if childlink.current %} aria-current="page"{% endif %}
+                  >
+                      {{ childlink.object.image |  img_url: '22x22' | img_tag }}<span class="site-nav__label-newsize ">{{ childlink.title | escape }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+              
+            {% else %}
+<!--               Run normally -->
+              <ul>
+                {% for childlink in link.links %}
+                  <li>
+                    <a href="{{ childlink.url }}"
+                    class="site-nav__link site-nav__child-link{% if forloop.last %} site-nav__link--last{% endif %}"
+                    {% if childlink.current %} aria-current="page"{% endif %}
+                  >
+                      <span class="site-nav__label">{{ childlink.title | escape }} nah</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          {% endif %}
+        </div>
+      </li>
+      
+    {% else %}
+      <li {% if link.active %} class="site-nav--active"{% endif %}>
+        <a href="{{ link.url }}"
+          class="site-nav__link site-nav__link--main {% if link.active %} site-nav__link--active{% endif %}"
+          {% if link.current %} aria-current="page"{% endif %}
+        >
+          <span class="site-nav__label">{{ link.title | escape }}</span>
+        </a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
