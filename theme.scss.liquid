@@ -7564,7 +7564,8 @@ $transition-controls-video: color 0.2s $ease-transition, background-color 0.2s $
   }
   
   .mobile-nav-wrapper.js-menu--is-open {
-    transform: translateY(100px) !important;
+/*     transform: translateY(100px) !important; */
+    transform: translateY(50px) !important;
   }
 }
 
@@ -8434,11 +8435,12 @@ $transition-controls-video: color 0.2s $ease-transition, background-color 0.2s $
 }
 .childlist-grid_custom {
   display: grid;
-  grid-template-columns: repeat(4, minmax(max-content, 1fr));
+  
+  grid-template-columns: repeat(4, max-content);
   margin-bottom: -15px;
   column-gap: 1rem;
-/*   row-gap: 1rem; */
   padding-bottom: 2rem;
+/*   grid-auto-flow: column; */
 }
 .site-nav__label-newsize {
   font-size: 14px;
@@ -8491,4 +8493,49 @@ $transition-controls-video: color 0.2s $ease-transition, background-color 0.2s $
 .site-nav__label-newsize-hover a:hover,
 .site-nav__label-newsize-hover a:active {
   color: #000;
+}
+.megamenu__specialized-section {
+  width: 300px;
+}
+
+.megamenu__specialized-section a {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  text-align: center;
+}
+.megamenu__specialized-section a:hover,
+.megamenu__specialized-section a:active {
+  color: #000;
+  text-decoration: underline;
+}
+.megamenu__specialized-section h4 {
+  padding-top: 1rem;
+  line-height: 1.5;
+}
+
+/* Mega Menu Media Queries */
+@media only screen and (max-width: 1560px){
+  .megamenu__specialized-section {
+    display: none;
+    
+  }
+}
+@media only screen and (max-width: 1280px){
+  .childlist-grid_custom {
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 0;
+  } 
+}
+@media only screen and (max-width: 1280px){ 
+    .childlist-grid_custom {
+    grid-template-columns: repeat(auto-fill, minmax(min-content,300px));
+    width: 80vw;
+  } 
+}
+@media only screen and (max-width: 749px ) {
+    .site-header .mobile-nav-wrapper {
+/*     transform: translateY(100px) !important; */
+    transform: translateY(125px) !important;
+  }
 }
