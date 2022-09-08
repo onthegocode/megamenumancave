@@ -61,8 +61,12 @@
                     {% endfor %}
                   {% endif %}
               </ul>
-                  
-            <img src="" height="500" width="500" />
+                  <div class="megamenu__specialized-section"> 
+                    <a href="{{ link.url }}">
+                    <img src="{{ link.object.image | img_url: "300x300" }}"  />
+                    <h4>{{ link.object.description }}</h4>
+                    </a> 
+              </div>
             </div>
 
 
@@ -92,7 +96,7 @@
                     class="site-nav__link site-nav__child-link{% if forloop.last %} site-nav__link--last{% endif %}"
                     {% if childlink.current %} aria-current="page"{% endif %}
                   >
-                      <span class="site-nav__label">{{ childlink.title | escape }} nah</span>
+                      <span class="site-nav__label">{{ childlink.title | escape }}</span>
                     </a>
                   </li>
                 {% endfor %}
