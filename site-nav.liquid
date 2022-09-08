@@ -1,7 +1,4 @@
-<script>
-  // let tabContent = document.querySelector('.tab-pane');
-  // tabContent.addEventListener('click', () => tabContent.classList.add('active', 'show'));
-</script>
+
 
 <ul class="site-nav list--inline {{ nav_alignment }}" id="SiteNav" >
   {% for link in linklists[section.settings.main_linklist].links %}
@@ -118,3 +115,12 @@
     {% endif %}
   {% endfor %}
 </ul>
+<script defer>
+  let sportTabContent = document.getElementsByClassName('site-nav__dropdown');
+  for(let i of sportTabContent) {
+    if(i.querySelector('.sports-collection-grid')) {
+      i.classList.add('custom_sports_collection-dropdown');
+      console.log(i);
+    }
+  }
+</script>
