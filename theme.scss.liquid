@@ -8476,9 +8476,8 @@ $transition-controls-video: color 0.2s $ease-transition, background-color 0.2s $
 }
 .sports-collection-grid { 
   display: grid;
-  grid-template-rows: repeat(3, max-content);
-  grid-template-columns: repeat(auto, max-content);
-  grid-auto-flow: column;
+  grid-template-columns: repeat(3, min-content);
+/*   grid-auto-flow: column; */
 }
 .site-nav__label-newsize-hover {
   padding-right: 4rem;
@@ -8514,6 +8513,8 @@ $transition-controls-video: color 0.2s $ease-transition, background-color 0.2s $
   line-height: 1.5;
 }
 
+
+
 /* Mega Menu Media Queries */
 @media only screen and (max-width: 1560px){
   .megamenu__specialized-section {
@@ -8533,9 +8534,16 @@ $transition-controls-video: color 0.2s $ease-transition, background-color 0.2s $
     width: 80vw;
   } 
 }
+
+@media only screen and (max-width: 1080px ) {
+  .sports-collection-grid  {
+    grid-template-columns: repeat(2, max-content);
+  }
+}
 @media only screen and (max-width: 749px ) {
     .site-header .mobile-nav-wrapper {
 /*     transform: translateY(100px) !important; */
     transform: translateY(125px) !important;
   }
 }
+
