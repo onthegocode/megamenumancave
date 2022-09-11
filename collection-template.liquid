@@ -1,0 +1,650 @@
+{% case section.settings.grid %}
+  {% when 2 %}
+    {%- assign max_height = 530 -%}
+  {% when 3 %}
+    {%- assign max_height = 345 -%}
+  {% when 4 %}
+    {%- assign max_height = 250 -%}
+  {% when 5 %}
+    {%- assign max_height = 195 -%}
+{% endcase %}
+
+{% if section.settings.layout == 'grid' %}
+  {%- assign limit = section.settings.grid | times: section.settings.rows -%}
+{% else %}
+  {%- assign limit = 16 -%}
+{% endif %}
+
+{% if template.suffix contains 'json' %}
+  {%- assign limit = 1000 -%}
+{% endif %}
+
+{% paginate collection.products by limit %}
+
+<div data-section-id="{{ section.id }}" data-section-type="collection-template">
+  <header class="collection-header">
+    {%- assign is_filter_by_available = false -%}
+    {%- if section.settings.tags_enable and collection.all_tags.size > 0 -%}
+      {%- assign is_filter_by_available = true -%}
+    {%- endif -%}
+
+    {%- assign is_vendor_or_type_collection = false -%}
+    {%- if collection.current_type != blank or collection.current_vendor != blank -%}
+      {%- assign is_vendor_or_type_collection = true -%}
+    {%- endif -%}
+
+<!--  Disabling Collection image to use for icon on nav -->
+    {% if 1 == 0 %}
+      <div class="collection-hero">
+        <div class="collection-hero__image ratio-container lazyload js"
+             data-bgset="{% include 'bgset', image: collection.image %}"
+             data-sizes="auto"
+             data-parent-fit="cover"
+             style="background-image: url('{{ collection.image | img_url: '300x300' }});"></div>
+        <noscript>
+          <div class="collection-hero__image" style="background-image: url({{ collection.image | img_url: '2048x600', crop: 'top' }});"></div>
+        </noscript>
+        <div class="collection-hero__title-wrapper">
+          <h1 class="collection-hero__title page-width">
+            <span role="text">
+              <span class="visually-hidden">{{ 'collections.general.collection_label' | t }}: </span>
+              {{ collection.title }}
+            </span>
+          </h1>
+        </div>
+      </div>
+      {% if is_filter_by_available == false and section.settings.sort_enable == false %}
+        <div class="page-width">
+          <span class="filters-toolbar__product-count">{{ 'collections.general.items_with_count' | t: count: collection.products_count }}</span>
+        </div>
+      {% endif %}
+      {% if collection.description != blank %}
+        <div class="rte collection-description page-width">
+          {{ collection.description }}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="page-width">
+        <div class="section-header section-header__flex">
+      <div class="left-section-header">
+          <h1>
+            <span role="text">
+              <span class="visually-hidden">{{ 'collections.general.collection_label' | t }}: </span>
+              {{ collection.title }}
+      
+            </span>
+      {% if collection.image %}
+  
+{% endif %}
+          </h1>
+            {% include 'breadcrumbs' %}
+            {% if collection.description != blank %}
+              <div class="rte">
+                {{ collection.description }}
+              </div>
+            {% endif %}
+            {% if is_filter_by_available == false and section.settings.sort_enable == false %}
+              <span class="filters-toolbar__product-count">{{ 'collections.general.items_with_count' | t: count: collection.products_count }}</span>
+            {% endif %}
+          </div>
+        <div class="right-section-header">
+          <h5 class="section-heading5-right">Items ship from our U.S. warehouses <span style="font-size: 20px;">🇺🇸</span></h5>
+        </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if is_filter_by_available or section.settings.sort_enable %}
+      <div class="filters-toolbar-wrapper{% if is_filter_by_available %} filters-toolbar--has-filter{% endif %}">
+        <div class="page-width">
+          <div class="filters-toolbar">
+            <div class="filters-toolbar__item-wrapper">
+              {% if section.settings.tags_enable and is_vendor_or_type_collection == false %}
+                {% unless collection.all_tags.size == 0 %}
+                  <div class="filters-toolbar__item-child">
+                    <label class="filters-toolbar__label select-label" for="FilterTags">{{ 'collections.filters.title_tags' | t }}</label>
+                    <div class="filters-toolbar__input-wrapper select-group">
+                      <select class="filters-toolbar__input hidden" name="FilterTags" id="FilterTags" aria-describedby="a11y-refresh-page-message a11y-selection-message">
+                        {% if current_tags %}
+                          {% if collection.handle %}
+                            <option value="/collections/{{ collection.handle }}">{{ 'collections.filters.all_tags' | t }}</option>
+                          {% elsif collection.current_type %}
+                            <option value="{{ collection.current_type | url_for_type }}">{{ 'collections.filters.all_tags' | t }}</option>
+                          {% elsif collection.current_vendor %}
+                            <option value="{{ collection.current_vendor | url_for_vendor }}">{{ 'collections.filters.all_tags' | t }}</option>
+                          {% endif %}
+                        {% else %}
+                          <option value="">{{ 'collections.filters.all_tags' | t }}</option>
+                        {% endif %}
+                        {% for tag in collection.all_tags %}
+                          <option value="/collections/{% if collection.handle != blank %}{{ collection.handle }}{% else %}all{% endif %}/{{ tag | handleize }}"{% if current_tags contains tag %} selected="selected"{% endif %}>{{ tag }}</option>
+                        {% endfor %}
+                      </select>
+                      {% include 'icon-chevron-down' %}
+                    </div>
+                  </div>
+                {% endunless %}
+              {% endif %}
+
+              {% if section.settings.sort_enable %}
+                <div class="filters-toolbar__item-child">
+                  {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+                  <label class="filters-toolbar__label select-label" for="SortBy">{{ 'collections.sorting.title' | t }}</label>
+                  <div class="filters-toolbar__input-wrapper select-group">
+                    <select name="sort_by" id="SortBy"
+                      class="filters-toolbar__input hidden"
+                      aria-describedby="a11y-refresh-page-message a11y-selection-message"
+                      data-default-sortby="{{ collection.default_sort_by }}"
+                    >
+                      {%- for option in collection.sort_options -%}
+                        <option value="{{ option.value }}" {% if option.value == sort_by %}selected="selected"{% endif %}>{{ option.name }}</option>
+                      {%- endfor -%}
+                    </select>
+                    {% include 'icon-chevron-down' %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="filters-toolbar__item filters-toolbar__item--count">
+              <span class="filters-toolbar__product-count">{{ 'collections.general.items_with_count' | t: count: collection.products_count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </header>
+
+  <div class="page-width" id="Collection">
+    
+    
+    
+      <div class="grid">
+    
+  {% if section.settings.show_sidebar %}  
+  <div class="grid__item small--one-whole medium-up--one-fifth">
+    
+    <input type='button' class="medium-up--hide" onclick="toggle_visibility('foo');" id='hideshow' value='Hide/Show Sidebar Filters' style="margin-bottom: 15px;">
+    
+    
+       <div id="foo" class="medium-up--hide">
+        {% include 'collection-sidebar' %}
+    </div>
+    
+    <div class="small--hide">
+      {% include 'collection-sidebar' %}
+    </div>
+    
+  </div>
+    
+     {% endif %}
+    
+  <div class="grid__item small--one-whole {% if section.settings.show_sidebar %}medium-up--four-fifths{% else %}medium-up--one-whole{% endif %}">
+
+    
+    {% if section.settings.layout == 'grid' %}
+      {% case section.settings.grid %}
+      {% when 2 %}
+        {%- assign grid_item_width = 'medium-up--one-half' -%}
+      {% when 3 %}
+        {%- assign grid_item_width = 'small--one-half medium-up--one-third' -%}
+      {% when 4 %}
+        {%- assign grid_item_width = 'small--one-half medium-up--one-quarter' -%}
+      {% when 5 %}
+        {%- assign grid_item_width = 'small--one-half medium-up--one-fifth' -%}
+      {% endcase %}
+
+      <ul class="grid grid--uniform{% if collection.products_count > 0 %} grid--view-items{% endif %}" id="products-list">
+        {% for product in collection.products %}
+          {% assign t = '' %}
+          {% for tag in product.tags %}
+        	{% assign tag_handle = tag | handle %}
+        	{% assign t = t | append: tag_handle %}
+        	{% unless forloop.last %}
+              {% assign t = t | append: ',' %}
+        	{% endunless %}
+          {% endfor %}
+          <li class="grid__item grid__item--{{section.id}} {{ grid_item_width }}" data-tags="{{ t }}">
+            {% include 'product-card-grid', max_height: max_height %}
+          </li>
+        {% else %}
+          {% comment %}
+          Add default products to help with onboarding for collections/all only.
+
+          The onboarding styles and products are only loaded if the
+          store has no products.
+          {% endcomment %}
+          {% if collection.handle == 'all' and collection.all_vendors.size == 0 and collection.all_types.size == 0 %}
+            <li class="grid__item">
+              <div class="grid grid--uniform">
+                {% for i in (1..limit) %}
+                  <div class="grid__item {{ grid_item_width }}">
+                    <div class="grid-view-item">
+                      <a href="#" class="grid-view-item__link">
+                        <div class="grid-view-item__image">
+                          {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+                          {{ 'product-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                        <div class="h4 grid-view-item__title">{{ 'homepage.onboarding.product_title' | t }}</div>
+                        <div class="grid-view-item__meta">
+                          <span class="product-price__price">$19.99</span>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </li>
+          {% else %}
+            {%- assign is_empty_collection = true -%}
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <ul class="list-view-items">
+        {% for product in collection.products %}
+          <li class="list-view-item">
+            {% include 'product-card-list', product: product %}
+          </li>
+        {% else %}
+
+          {% comment %}
+          Add default products to help with onboarding for collections/all only.
+
+          The onboarding styles and products are only loaded if the
+          store has no products.
+          {% endcomment %}
+          {% if collection.handle == 'all' and collection.all_vendors.size == 0 and collection.all_types.size == 0%}
+            {% for i in (1..4) %}
+              <li class="list-view-item">
+                <a href="#" class="list-view-item__link">
+                  <div class="list-view-item__image-column">
+                    <div class="list-view-item__image-wrapper">
+                      <div class="list-view-item__image">
+                        {% capture current %}{% cycle 1, 2, 3, 4 %}{% endcapture %}
+                        {{ 'product-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="list-view-item__title-column">
+                    <div class="list-view-item__title">{{ 'homepage.onboarding.product_title' | t }}</div>
+                  </div>
+
+                  <div class="list-view-item__price-column">
+                    <span class="product-price__price">$19.99</span>
+                  </div>
+                </a>
+              </li>
+            {% endfor %}
+          {% else %}
+            {%- assign is_empty_collection = true -%}
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if is_empty_collection %}
+      <div class="grid__item small--text-center">
+        <p class="text-center">{{ 'collections.general.no_matches' | t }}</p>
+      </div>
+    {% endif %}
+
+    {% if paginate.pages > 1 %}
+      {% include 'pagination' %}
+    {% endif %}
+  </div>
+</div>
+ </div>
+
+{% endpaginate %}
+  
+  <script type="text/javascript">
+<!--
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+       if(e.style.display == 'block')
+          e.style.display = 'none';
+       else
+          e.style.display = 'block';
+    }
+//-->
+</script>
+
+<style>
+  #foo {
+    display: none;
+}
+  </style>
+
+
+
+{% schema %}
+{
+  "name": {
+    "da": "Kollektionssider",
+    "de": "Kategorie-Seiten",
+    "en": "Collection pages",
+    "es": "Páginas de colección",
+    "fi": "Kokoelman sivut",
+    "fr": "Pages de collections",
+    "hi": "कलेक्शन पेज",
+    "it": "Pagine delle collezioni",
+    "ja": "コレクションページ",
+    "ko": "컬렉션 페이지",
+    "ms": "Halaman koleksi",
+    "nb": "Samlingssider",
+    "nl": "Collectiepagina's",
+    "pt-BR": "Páginas de coleções",
+    "pt-PT": "Páginas de Coleções",
+    "sv": "Produktseriesidor",
+    "th": "หน้าคอลเลกชัน",
+    "zh-CN": "产品系列页面",
+    "zh-TW": "商品系列頁面"
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": {
+        "da": "Layout",
+        "de": "Layout",
+        "en": "Layout",
+        "es": "Diseño",
+        "fi": "Asettelu",
+        "fr": "Mise en page",
+        "hi": "लेआउट",
+        "it": "Layout",
+        "ja": "レイアウト",
+        "ko": "레이아웃",
+        "ms": "Susun atur",
+        "nb": "Oppsett",
+        "nl": "Indeling",
+        "pt-BR": "Layout",
+        "pt-PT": "Esquema",
+        "sv": "Layout",
+        "th": "เลย์เอาต์",
+        "zh-CN": "布局",
+        "zh-TW": "版面配置"
+      },
+      "default": "grid",
+      "options": [
+        {
+          "value": "grid",
+          "label": {
+            "da": "Gitter",
+            "de": "Raster",
+            "en": "Grid",
+            "es": "Cuadrícula",
+            "fi": "Ruudukko",
+            "fr": "Grille",
+            "hi": "ग्रिड",
+            "it": "Griglia",
+            "ja": "グリッド",
+            "ko": "그리드",
+            "ms": "Grid",
+            "nb": "Rutenett",
+            "nl": "Raster",
+            "pt-BR": "Grade",
+            "pt-PT": "Grelha",
+            "sv": "Rutnät",
+            "th": "กริด",
+            "zh-CN": "网格",
+            "zh-TW": "網格"
+          }
+        },
+        {
+          "value": "list",
+          "label": {
+            "da": "Liste",
+            "de": "Liste",
+            "en": "List",
+            "es": "Lista",
+            "fi": "Luettelo",
+            "fr": "Liste",
+            "hi": "सूची",
+            "it": "Elenco",
+            "ja": "リスト",
+            "ko": "목록",
+            "ms": "Senarai",
+            "nb": "Liste",
+            "nl": "Lijst",
+            "pt-BR": "Lista",
+            "pt-PT": "Lista",
+            "sv": "Lista",
+            "th": "รายการ",
+            "zh-CN": "列表",
+            "zh-TW": "清單"
+          }
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "grid",
+      "label": {
+        "da": "Produkter pr. række (kun gitter)",
+        "de": "Produkte per Reihe (nur Raster)",
+        "en": "Products per row (grid only)",
+        "es": "Productos por fila (solo cuadrícula)",
+        "fi": "Tuotteita per rivi (vain ruudukko)",
+        "fr": "Produits par rangée (grille uniquement)",
+        "hi": "उत्पाद प्रति पंक्ति (केवल ग्रिड)",
+        "it": "Prodotti per riga (solo griglia)",
+        "ja": "行あたりの商品数（グリッドのみ）",
+        "ko": "열 별 제품 (그리드 전용)",
+        "ms": "Produk setiap baris (grid sahaja)",
+        "nb": "Produkter per rad (kun rutenett)",
+        "nl": "Producten per rij (alleen raster)",
+        "pt-BR": "Produtos por linha (somente grade)",
+        "pt-PT": "Produtos por linha (somente grelha)",
+        "sv": "Produkter per rad (endast rutnät)",
+        "th": "สินค้าต่อแถว (กริดเท่านั้น)",
+        "zh-CN": "每行产品数（仅限网格）",
+        "zh-TW": "每列產品數 (僅限網格)"
+      },
+      "default": 4,
+      "min": 2,
+      "max": 5,
+      "step": 1
+    },
+    {
+      "type": "range",
+      "id": "rows",
+      "label": {
+        "da": "Rækker pr. side (kun gitter)",
+        "de": "Reihen per Seite (nur Raster)",
+        "en": "Rows per page (grid only)",
+        "es": "Filas por página (solo cuadrícula)",
+        "fi": "Rivejä per sivu (vain ruudukko)",
+        "fr": "Rangées par page (grille uniquement)",
+        "hi": "प्रति पृष्ठ पंक्तियां (केवल ग्रिड)",
+        "it": "Righe per pagina (solo griglia)",
+        "ja": "ページあたりの行数（グリッドのみ）",
+        "ko": "페이지 별 열 (그리드 전용)",
+        "ms": "Baris setiap halaman (grid sahaja)",
+        "nb": "Rader per side (kun rutenett)",
+        "nl": "Rijen per pagina (alleen raster)",
+        "pt-BR": "Linhas por página (somente grade)",
+        "pt-PT": "Linhas por página (somente grelha)",
+        "sv": "Rader per sida (endast rutnät)",
+        "th": "แถวต่อหน้า (กริดเท่านั้น)",
+        "zh-CN": "每行产品数（仅限网格）",
+        "zh-TW": "每頁列數 (僅限網格)"
+      },
+      "default": 2,
+      "min": 2,
+      "max": 8,
+      "step": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_image",
+      "label": {
+        "da": "Vis kollektionsbillede",
+        "de": "Kategorie-Foto anzeigen",
+        "en": "Show collection image",
+        "es": "Mostrar imagen de la colección",
+        "fi": "Näytä kokoelman kuva",
+        "fr": "Afficher l'image de la collection",
+        "hi": "कलेक्शन इमेज दिखाएं",
+        "it": "Mostra immagine collezione",
+        "ja": "コレクションの画像を表示する",
+        "ko": "컬렉션 이미지 표시",
+        "ms": "Tunjukkan imej koleksi",
+        "nb": "Vis samlingsbilde",
+        "nl": "Collectieafbeelding weergeven",
+        "pt-BR": "Exibir imagem da coleção",
+        "pt-PT": "Mostrar imagem da coleção",
+        "sv": "Visa produktseriebilder",
+        "th": "แสดงรูปภาพคอลเลกชัน",
+        "zh-CN": "显示产品系列图片",
+        "zh-TW": "顯示商品系列圖片"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": {
+        "da": "Vis produktleverandører",
+        "de": "Produkt-Lieferanten anzeigen",
+        "en": "Show product vendors",
+        "es": "Mostrar proveedores del producto",
+        "fi": "Näytä tuotteen myyjät",
+        "fr": "Afficher les vendeurs",
+        "hi": "उत्पाद विक्रेताओं को दिखाएं",
+        "it": "Mostra fornitori prodotto",
+        "ja": "商品の販売元を表示する",
+        "ko": "제품 공급 업체 표시",
+        "ms": "Tunjukkan vendor produk",
+        "nb": "Vis produktleverandører",
+        "nl": "Productleveranciers weergeven",
+        "pt-BR": "Exibir fornecedores do produto",
+        "pt-PT": "Mostrar fornecedores do produto",
+        "sv": "Visa produktleverantörer",
+        "th": "แสดงผู้ขายสินค้า",
+        "zh-CN": "显示产品厂商",
+        "zh-TW": "顯示產品廠商"
+      },
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "sort_enable",
+      "label": {
+        "da": "Aktivér sortering",
+        "de": "Sortieren erlauben",
+        "en": "Enable sorting",
+        "es": "Habilitar la función ordenar",
+        "fi": "Ota lajittelu käyttöön",
+        "fr": "Activer le tri",
+        "hi": "क्रमबद्ध करना सक्षम करें",
+        "it": "Permetti di ordinare",
+        "ja": "並べ替えを有効にする",
+        "ko": "정렬 사용",
+        "ms": "Dayakan penyusunan",
+        "nb": "Aktiver sortering",
+        "nl": "Sortering inschakelen",
+        "pt-BR": "Ativar classificação",
+        "pt-PT": "Ativar ordenação",
+        "sv": "Aktivera sortering",
+        "th": "เปิดใช้การจัดเรียง",
+        "zh-CN": "启用排序",
+        "zh-TW": "啟用排序"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "tags_enable",
+      "label": {
+        "da": "Aktivér tagfiltrering",
+        "de": "Tag-Filtern erlauben",
+        "en": "Enable tag filtering",
+        "es": "Habilitar filtro de etiquetas",
+        "fi": "Ota tunnisteiden suodatus käyttöön",
+        "fr": "Activer le filtrage par balises",
+        "hi": "टैग फ़िल्टर करना सक्षम करें",
+        "it": "Attiva filtro tag",
+        "ja": "タグでの絞り込みを有効にする",
+        "ko": "태그 필터링 사용",
+        "ms": "Dayakan penapisan tag",
+        "nb": "Aktiver taggfiltrering",
+        "nl": "Filteren op tags inschakelen",
+        "pt-BR": "Ativar filtragem de tags",
+        "pt-PT": "Ativar filtragem por etiqueta",
+        "sv": "Aktivera taggfiltrering",
+        "th": "เปิดใช้การกรองแท็ก",
+        "zh-CN": "启用标签筛选",
+        "zh-TW": "啟用標籤篩選功能"
+      },
+      "default": true
+    },
+  	  {
+        "type": "header",
+        "content": "Sidebar"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_sidebar",
+        "label": "Show Sidebar",
+        "default": true
+      }
+    ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Select menu"
+        }      
+      ]
+    },
+	{
+      "type": "vendors",
+      "name": "Vendor List",
+	  "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        }      
+      ]
+    },
+	{
+      "type": "types",
+      "name": "Type List",
+	  "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        }      
+      ]
+    },
+	{
+      "type": "tag-list",
+      "name": "Tag List",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+		{
+          "type": "textarea",
+          "id": "tags",
+          "label": "Tags",
+		  "info": "Enter a comma(,) separated list of tags."
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
